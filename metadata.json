@@ -1,0 +1,6 @@
+{
+  "name": "Smart AI Hospital Platform",
+  "description": "Smart AI Hospital Platform (Production Ready & Global Enterprise Edition 10.0 - Cloud Native Multi-Region K8s Ops, Security SOC 24/7, Compliance ISO/SATUSEHAT, Disaster Recovery DRC, FinOps Governance, Service Desk SLA & Production Readiness)",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
