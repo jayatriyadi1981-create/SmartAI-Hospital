@@ -29,8 +29,10 @@ import {
 } from 'lucide-react';
 import { MOCK_LAB_ORDERS, MOCK_PATIENTS } from '../data/mockData';
 import { LabOrder, LabCategory } from '../types';
+import { useHospitalData } from '../context/HospitalDataContext';
 
 export const LISView: React.FC = () => {
+  const { addLabOrder, addNotification, addActivityLog } = useHospitalData();
   const [activeTab, setActiveTab] = useState<'worklist' | 'analyzer' | 'qc' | 'barcode'>('worklist');
   const [orders, setOrders] = useState<LabOrder[]>(MOCK_LAB_ORDERS);
   const [selectedOrder, setSelectedOrder] = useState<LabOrder | null>(MOCK_LAB_ORDERS[0] || null);
@@ -155,6 +157,14 @@ export const LISView: React.FC = () => {
     };
     setOrders([newOrd, ...orders]);
     setSelectedOrder(newOrd);
+    addLabOrder(newOrd);
+    addNotification({
+      title: 'Sample Order Lab Baru (LIS)',
+      message: `Order Baru untuk ${newOrd.patientName} (${newOrd.specimenBarcode}) telah dibuat.`,
+      category: 'Laboratorium',
+      type: newPriority === 'CITO' ? 'urgent' : 'normal'
+    });
+    addActivityLog(`Penerbitan Order Lab ${newOrd.specimenBarcode} (${newOrd.patientName})`, 'Laboratorium Sentral LIS');
     setShowOrderModal(false);
   };
 

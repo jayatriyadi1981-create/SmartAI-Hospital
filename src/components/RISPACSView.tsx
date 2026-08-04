@@ -32,8 +32,10 @@ import {
 } from 'lucide-react';
 import { MOCK_RADIOLOGY_ORDERS, MOCK_PATIENTS } from '../data/mockData';
 import { RadiologyOrder, RadiologyModality } from '../types';
+import { useHospitalData } from '../context/HospitalDataContext';
 
 export const RISPACSView: React.FC = () => {
+  const { addRadiologyOrder, addNotification, addActivityLog } = useHospitalData();
   const [orders, setOrders] = useState<RadiologyOrder[]>(MOCK_RADIOLOGY_ORDERS);
   const [selectedOrder, setSelectedOrder] = useState<RadiologyOrder | null>(MOCK_RADIOLOGY_ORDERS[0] || null);
   const [activeTab, setActiveTab] = useState<'PACS' | 'RIS' | 'Report' | 'Import'>('PACS');
@@ -149,6 +151,14 @@ export const RISPACSView: React.FC = () => {
     };
     setOrders([newOrd, ...orders]);
     setSelectedOrder(newOrd);
+    addRadiologyOrder(newOrd);
+    addNotification({
+      title: 'Order Radiologi Baru (PACS)',
+      message: `${newOrd.modality} (${newOrd.examinationName}) untuk ${newOrd.patientName} berhasil terdaftar.`,
+      category: 'Laboratorium',
+      type: 'normal'
+    });
+    addActivityLog(`Penerbitan Order PACS Radiologi ${newOrd.modality} (${newOrd.patientName})`, 'Radiologi & PACS DICOM');
     setShowOrderModal(false);
   };
 

@@ -109,19 +109,18 @@ export const PharmacyView: React.FC = () => {
     e.preventDefault();
     const newBatch: DrugBatch = {
       id: `batch-${Date.now()}`,
-      drugMasterId: 'drg-01',
+      drugId: 'drg-01',
       drugName: batchDrugName,
       batchNumber: batchNumber,
-      expiryDate: batchExpDate,
-      quantityInStock: Number(batchQuantity),
-      manufactureDate: '2025-01-01',
-      supplier: 'PT Kalbe Farma',
-      storageLocation: 'Gudang Utama - Rak A3'
+      expiredDate: batchExpDate,
+      quantity: Number(batchQuantity),
+      warehouseLocation: 'Depo Farmasi Utama - Rak FEFO 01',
+      fefoPriority: 1
     };
     setBatches([newBatch, ...batches]);
     addNotification({
       title: 'Batch FEFO Obat Baru Masuk',
-      message: `Batch ${newBatch.batchNumber} (${newBatch.drugName}) exp: ${newBatch.expiryDate} telah ditambahkan.`,
+      message: `Batch ${newBatch.batchNumber} (${newBatch.drugName}) exp: ${newBatch.expiredDate} telah ditambahkan.`,
       category: 'Farmasi',
       type: 'normal'
     });
@@ -138,13 +137,15 @@ export const PharmacyView: React.FC = () => {
     });
     const newDispense: DrugDispense = {
       id: `disp-${Date.now()}`,
-      prescriptionNumber: `RX-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+      prescriptionId: `RX-2026-${Math.floor(1000 + Math.random() * 9000)}`,
       patientName: dispensePatientName,
       norm: `RM-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-      dispenseDate: new Date().toLocaleTimeString('id-ID'),
-      pharmacistName: 'Apt. Rina, S.Farm',
+      unitType: 'Outpatient',
+      dispenseTime: new Date().toLocaleTimeString('id-ID'),
+      dispensedBy: 'Apt. Rina, S.Farm',
       status: 'Dispensed',
-      items: [{ drugName: dispenseDrugName, quantity: 10, unitPrice: 2000, totalPrice: 20000 }]
+      narcoticLedgerChecked: true,
+      dispensedItems: [{ drugName: dispenseDrugName, dosage: dispenseDosage, quantity: 10, batchNumber: 'B-2026-901' }]
     };
     setDispenses([newDispense, ...dispenses]);
     setShowAddDispenseModal(false);
