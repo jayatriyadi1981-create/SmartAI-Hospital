@@ -6,6 +6,8 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { HospitalDataProvider, useHospitalData } from './context/HospitalDataContext';
+import { RealtimeIntegrationBar } from './components/RealtimeIntegrationBar';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { ExecutiveDashboard } from './components/ExecutiveDashboard';
@@ -58,19 +60,21 @@ import { Bot, Sparkles } from 'lucide-react';
 
 function AppContent() {
   const { showLoginModal, setShowLoginModal } = useAuth();
+  const {
+    currentView,
+    setCurrentView,
+    selectedPatient,
+    setSelectedPatient,
+    notifications,
+    markAllNotificationsRead
+  } = useHospitalData();
+
   const [isLandingPage, setIsLandingPage] = useState<boolean>(true);
-  const [currentView, setCurrentView] = useState<string>('Dashboard');
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState<boolean>(false);
   const [isAIPatientAssistantOpen, setIsAIPatientAssistantOpen] = useState<boolean>(false);
-  const [selectedPatientForEMR, setSelectedPatientForEMR] = useState<Patient>(MOCK_PATIENTS[0]);
-  const [notifications, setNotifications] = useState<NotificationItem[]>(NOTIFICATIONS);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const handleMarkAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
 
   if (isLandingPage) {
     return (
@@ -100,7 +104,7 @@ function AppContent() {
         return (
           <PatientRegistration
             onPatientRegistered={(p) => {
-              setSelectedPatientForEMR(p);
+              setSelectedPatient(p);
             }}
             onNavigateToQueue={() => setCurrentView('Antrian')}
           />
@@ -110,29 +114,29 @@ function AppContent() {
         return (
           <PatientManagement
             onSelectPatientForEMR={(p) => {
-              setSelectedPatientForEMR(p);
+              setSelectedPatient(p);
               setCurrentView('Medical Record');
             }}
             onAddNewPatient={() => setCurrentView('Pendaftaran')}
             onNavigateToPolyclinic={(p) => {
-              setSelectedPatientForEMR(p);
+              setSelectedPatient(p);
               setCurrentView('Rawat Jalan');
             }}
             onNavigateToInpatient={(p) => {
-              setSelectedPatientForEMR(p);
+              setSelectedPatient(p);
               setCurrentView('Rawat Inap');
             }}
           />
         );
       case 'Medical Record':
       case 'Rekam Medis (EMR)':
-        return <EMRView patient={selectedPatientForEMR} />;
+        return <EMRView patient={selectedPatient} />;
       case 'Rawat Jalan':
       case 'Rawat Jalan (Poliklinik)':
         return (
           <PolyclinicOutpatientView
             onOpenEMR={(p) => {
-              setSelectedPatientForEMR(p);
+              setSelectedPatient(p);
               setCurrentView('Medical Record');
             }}
           />
@@ -147,7 +151,7 @@ function AppContent() {
         return (
           <InpatientBedManagement
             onOpenEMRForPatient={(p) => {
-              setSelectedPatientForEMR(p);
+              setSelectedPatient(p);
               setCurrentView('Medical Record');
             }}
           />
@@ -269,6 +273,9 @@ function AppContent() {
         onOpenLandingPage={() => setIsLandingPage(true)}
       />
 
+      {/* Real-Time Integration & Cross-Link Bar */}
+      <RealtimeIntegrationBar />
+
       {/* Main Container */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar Navigation */}
@@ -306,13 +313,13 @@ function AppContent() {
         isOpen={isNotificationsOpen}
         onClose={() => setIsNotificationsOpen(false)}
         notifications={notifications}
-        onMarkAllRead={handleMarkAllRead}
+        onMarkAllRead={markAllNotificationsRead}
       />
 
       <AIPatientAssistantModal
         isOpen={isAIPatientAssistantOpen}
         onClose={() => setIsAIPatientAssistantOpen(false)}
-        patient={selectedPatientForEMR}
+        patient={selectedPatient}
       />
     </div>
   );
@@ -323,7 +330,9 @@ export default function App() {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <AppContent />
+        <HospitalDataProvider>
+          <AppContent />
+        </HospitalDataProvider>
       </ThemeProvider>
     </AuthProvider>
   );

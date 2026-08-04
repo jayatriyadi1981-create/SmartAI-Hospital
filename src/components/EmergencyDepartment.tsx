@@ -35,8 +35,10 @@ import {
 } from 'lucide-react';
 import { EmergencyVisit, TriageCategory } from '../types';
 import { MOCK_EMERGENCY_VISITS } from '../data/mockData';
+import { useHospitalData } from '../context/HospitalDataContext';
 
 export const EmergencyDepartment: React.FC = () => {
+  const { addPatient, addNotification, addActivityLog } = useHospitalData();
   const [visits, setVisits] = useState<EmergencyVisit[]>(MOCK_EMERGENCY_VISITS);
   const [activeTab, setActiveTab] = useState<'list' | 'matrix' | 'ai-calc' | 'code-blue'>('list');
   const [filterTriage, setFilterTriage] = useState<string>('Semua');
@@ -154,6 +156,31 @@ export const EmergencyDepartment: React.FC = () => {
     setShowNewModal(false);
     setNewPatientName('');
     setNewChiefComplaint('');
+
+    // Sync to global SIMRS context
+    addPatient({
+      fullName: newEntry.patientName,
+      norm: newEntry.norm,
+      gender: 'Laki-laki',
+      dob: '1985-05-12',
+      phone: '0812-9988-7766',
+      bloodType: 'O+',
+      nik: '3171021205850001',
+      insuranceType: 'BPJS Kesehatan',
+      bpjsCardNumber: '000192837482',
+      address: 'DKI Jakarta',
+      allergies: ['Penicillin'],
+      status: 'Emergency'
+    });
+
+    addNotification({
+      title: `Pasien IGD Baru (Triage ${newTriage})`,
+      message: `${newEntry.patientName} masuk ${newEntry.bedNumber} - ${newEntry.chiefComplaint}`,
+      category: 'IGD',
+      type: newTriage === 'Merah' ? 'emergency' : 'normal'
+    });
+
+    addActivityLog(`Pendaftaran Triage IGD: ${newEntry.patientName} (${newEntry.bedNumber})`, 'IGD & Triage AI');
     showToast(`Pasien ${newEntry.patientName} berhasil ditambahkan ke ${newEntry.bedNumber} (Triage ${newTriage})`);
   };
 

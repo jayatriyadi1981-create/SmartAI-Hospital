@@ -49,6 +49,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp, onOpenLogi
   const [bedCount, setBedCount] = useState<number>(250);
   const [outpatientCount, setOutpatientCount] = useState<number>(600);
 
+  // Pricing State
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+
   // Calculated ROI
   const estimatedAnnualSavings = (bedCount * 4.2 + outpatientCount * 1.5).toFixed(1);
   const timeSavedMinutes = Math.min(165, Math.round(120 + (outpatientCount / 20)));
@@ -507,6 +510,300 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp, onOpenLogi
                 Login Instant Sebagai Admin IT →
               </div>
             </button>
+          </div>
+        </div>
+      </section>
+
+      {/* PAKET LAYANAN & PRICING SECTION */}
+      <section id="pricing" className="py-20 px-4 sm:px-8 lg:px-12 bg-slate-900/80 border-t border-slate-800 relative">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-cyan-500/5 rounded-full blur-[140px] pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto space-y-12 relative z-10">
+          {/* Section Header */}
+          <div className="text-center space-y-4">
+            <span className="text-xs font-bold text-cyan-400 uppercase tracking-widest bg-cyan-950/80 px-4 py-1.5 rounded-full border border-cyan-500/30">
+              PAKET LAYANAN & LISENSI ENTERPRISE SIMRS
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+              Pilihan Paket Implementasi Sesuai Skala Rumah Sakit & Faskes Anda
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
+              Investasi transparan tanpa biaya tersembunyi. Termasuk pembaruan regulasi Kemenkes SATUSEHAT, pemeliharaan sistem, & keamanan standar medis.
+            </p>
+
+            {/* Billing Toggle Switch */}
+            <div className="flex items-center justify-center gap-3 pt-4">
+              <span className={`text-xs font-bold transition ${billingCycle === 'monthly' ? 'text-white' : 'text-slate-400'}`}>
+                Tagihan Bulanan
+              </span>
+
+              <button
+                onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
+                className="relative inline-flex h-7 w-14 items-center rounded-full bg-slate-800 p-1 border border-slate-700 transition-colors focus:outline-none"
+              >
+                <span
+                  className={`inline-block h-5 w-5 transform rounded-full bg-cyan-400 transition-transform ${
+                    billingCycle === 'yearly' ? 'translate-x-7 bg-emerald-400' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+
+              <div className="flex items-center gap-1.5">
+                <span className={`text-xs font-bold transition ${billingCycle === 'yearly' ? 'text-emerald-400' : 'text-slate-400'}`}>
+                  Tagihan Tahunan
+                </span>
+                <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-extrabold text-emerald-300 border border-emerald-500/30">
+                  HEMAT 20%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Pricing Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+            {/* Plan 1: Klinik & Faskes Pratama */}
+            <div className="rounded-3xl border border-slate-800 bg-slate-950/90 p-8 flex flex-col justify-between space-y-6 hover:border-slate-700 transition shadow-2xl relative">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="rounded-xl bg-slate-800 px-3 py-1 text-xs font-bold text-slate-300">
+                    Faskes Pratama / Klinik
+                  </span>
+                  <Building2 className="h-5 w-5 text-slate-400" />
+                </div>
+
+                <h3 className="text-xl font-bold text-white">Paket Klinik & RS Pratama</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Solusi ideal untuk Klinik Pratama, Klinik Utama, RS Tipe D, & Puskesmas rawat inap skala kecil.
+                </p>
+
+                <div className="py-2 border-y border-slate-800/80">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-extrabold text-white">
+                      Rp {billingCycle === 'yearly' ? '3,600,000' : '4,500,000'}
+                    </span>
+                    <span className="text-xs text-slate-400 font-medium">/ bulan</span>
+                  </div>
+                  {billingCycle === 'yearly' && (
+                    <span className="text-[11px] text-emerald-400 font-medium block mt-1">
+                      Ditagih Rp 43.2 Juta / tahun (Hemat Rp 10.8 Juta)
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-3 pt-2">
+                  <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                    Cakupan Fitur Termasuk:
+                  </span>
+                  <ul className="space-y-2.5 text-xs text-slate-300">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>Kapasitas s.d 30 Bed & Pasien Rawat Jalan Unlimited</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>SIMRS Core (Pendaftaran, Poliklinik, Kasir, Depo Obat)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>Rekam Medis Elektronik (RME) Permenkes No. 24/2022</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>Bridging SATUSEHAT Kemenkes (Encounter & Condition)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>Manajemen Stok Obat FEFO & e-Prescription</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>Dukungan Teknis Hotline Email & WA (08:00 - 17:00)</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <button
+                onClick={onEnterApp}
+                className="w-full rounded-xl border border-slate-700 bg-slate-900 py-3 text-xs font-bold text-slate-200 hover:border-cyan-500 hover:text-cyan-300 transition"
+              >
+                Coba Demo Paket Pratama
+              </button>
+            </div>
+
+            {/* Plan 2: RSUD / RS Swasta Tipe C & B (RECOMMENDED) */}
+            <div className="rounded-3xl border-2 border-cyan-500 bg-slate-950 p-8 flex flex-col justify-between space-y-6 shadow-2xl shadow-cyan-500/20 relative scale-105 z-10">
+              {/* Popular Badge */}
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 px-4 py-1 text-[11px] font-black text-white shadow-lg tracking-wider uppercase flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                PALING POPULER & TERLENGKAP
+              </div>
+
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center justify-between">
+                  <span className="rounded-xl bg-cyan-500/20 px-3 py-1 text-xs font-bold text-cyan-300 border border-cyan-500/30">
+                    RSUD / RS Tipe C & B
+                  </span>
+                  <Bot className="h-5 w-5 text-cyan-400" />
+                </div>
+
+                <h3 className="text-xl font-black text-white">Paket Enterprise AI Hospital</h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Paket terpopuler untuk RSUD & RS Swasta yang menginginkan integrasi penuh CDSS AI, BPJS V-Claim, & SATUSEHAT FHIR.
+                </p>
+
+                <div className="py-2 border-y border-slate-800">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-black text-cyan-300">
+                      Rp {billingCycle === 'yearly' ? '14,800,000' : '18,500,000'}
+                    </span>
+                    <span className="text-xs text-slate-400 font-medium">/ bulan</span>
+                  </div>
+                  {billingCycle === 'yearly' && (
+                    <span className="text-[11px] text-emerald-400 font-bold block mt-1">
+                      Ditagih Rp 177.6 Juta / tahun (Hemat Rp 44.4 Juta)
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-3 pt-2">
+                  <span className="text-[11px] font-bold text-cyan-300 uppercase tracking-wider block">
+                    Semua Fitur Pratama Plus:
+                  </span>
+                  <ul className="space-y-2.5 text-xs text-slate-200">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+                      <span className="font-semibold text-white">Kapasitas s.d 300 Bed & Multi Nurse Station</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+                      <span className="font-semibold text-cyan-200">Autonomous CDSS AI & Voice EMR CPPT Scribe</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+                      <span className="font-semibold text-white">Bridging V-Claim BPJS Health 2.0 (Zero Pending SEP)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+                      <span>Full SATUSEHAT FHIR R4 (Encounter, Condition, Lab, PACS)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+                      <span>Predictive ICU Sentinel (EWS Vital Signs Monitoring)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+                      <span>Executive BI Command Center & Real-Time BOR/LOS Analytics</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+                      <span>Pendampingan Migrasi Data On-Site & SLA Support 24/7</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <button
+                onClick={onEnterApp}
+                className="w-full rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 py-3.5 text-xs font-black text-white shadow-xl shadow-cyan-500/25 hover:from-cyan-400 hover:to-indigo-500 transition animate-pulse"
+              >
+                Buka Demo Paket Enterprise AI Sekarang →
+              </button>
+            </div>
+
+            {/* Plan 3: RSUP & Holding Multi-Hospital */}
+            <div className="rounded-3xl border border-slate-800 bg-slate-950/90 p-8 flex flex-col justify-between space-y-6 hover:border-indigo-500/50 transition shadow-2xl relative">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="rounded-xl bg-indigo-500/20 px-3 py-1 text-xs font-bold text-indigo-300 border border-indigo-500/30">
+                    RSUP / Holding Group
+                  </span>
+                  <Globe className="h-5 w-5 text-indigo-400" />
+                </div>
+
+                <h3 className="text-xl font-bold text-white">Paket RSUP & Holding Group</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Arsitektur Multi-Tenant, Private Cloud / On-Premise Hybrid untuk RSUP Kemenkes, RS Tipe A, & Holding RS BUMN/Swasta.
+                </p>
+
+                <div className="py-2 border-y border-slate-800/80">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-black text-indigo-300">
+                      Custom / Tailored
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-400 font-medium block mt-1">
+                    Disesuaikan dengan jumlah cabang RS & infrastruktur server
+                  </span>
+                </div>
+
+                <div className="space-y-3 pt-2">
+                  <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block">
+                    Fasilitas Khusus Holding:
+                  </span>
+                  <ul className="space-y-2.5 text-xs text-slate-300">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+                      <span>Kapasitas Bed & Pengguna Multi-Cabang Tanpa Batas</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+                      <span>Dedicated AI Agent Model Training dengan Data Medis Internal RS</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+                      <span>Opsi Opsi Private Cloud / Dedicated On-Premise Server</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+                      <span>Sertifikasi ISO 27001, Disaster Recovery (DRC) Dual Active</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+                      <span>Custom Interoperabilitas Legacy HIS / SAP / Oracle ERP</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
+                      <span>Dedicated Senior Technical Account Manager & SLA 99.99%</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <button
+                onClick={onEnterApp}
+                className="w-full rounded-xl border border-indigo-500/50 bg-indigo-950/50 py-3 text-xs font-bold text-indigo-200 hover:bg-indigo-900/80 transition"
+              >
+                Konsultasi Paket Holding & Custom
+              </button>
+            </div>
+          </div>
+
+          {/* Included Guarantees & Features Bar */}
+          <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-xs">
+            <div className="space-y-1">
+              <ShieldCheck className="h-5 w-5 text-emerald-400 mx-auto" />
+              <div className="font-bold text-white">Jaminan Regulasi 100%</div>
+              <div className="text-[11px] text-slate-400">Selalu terupdate dengan Permenkes & SATUSEHAT</div>
+            </div>
+
+            <div className="space-y-1">
+              <Zap className="h-5 w-5 text-amber-400 mx-auto" />
+              <div className="font-bold text-white">Implementasi Cepat 14 Hari</div>
+              <div className="text-[11px] text-slate-400">Migrasi data otomatis tanpa mengganggu operasional</div>
+            </div>
+
+            <div className="space-y-1">
+              <Database className="h-5 w-5 text-cyan-400 mx-auto" />
+              <div className="font-bold text-white">Cloud Backup Otomatis</div>
+              <div className="text-[11px] text-slate-400">Enkripsi AES-256 bit & backup berkala setiap jam</div>
+            </div>
+
+            <div className="space-y-1">
+              <Users className="h-5 w-5 text-indigo-400 mx-auto" />
+              <div className="font-bold text-white">Pelatihan SDM Lengkap</div>
+              <div className="text-[11px] text-slate-400">Sertifikasi modul untuk dokter, perawat, & staf kasir</div>
+            </div>
           </div>
         </div>
       </section>

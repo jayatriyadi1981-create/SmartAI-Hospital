@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { MOCK_GL_ACCOUNTS, MOCK_BILLING_INVOICES } from '../data/mockData';
 import { GeneralLedgerAccount, BillingInvoice } from '../types';
+import { useHospitalData } from '../context/HospitalDataContext';
 
 interface BPJSClaimRecord {
   id: string;
@@ -64,6 +65,7 @@ interface JournalEntryItem {
 }
 
 export const FinanceRCMView: React.FC = () => {
+  const { addBillingInvoice, addNotification, addActivityLog } = useHospitalData();
   const [activeTab, setActiveTab] = useState<'billing' | 'gl' | 'rcm' | 'leakage_ai'>('billing');
   const [invoices, setInvoices] = useState<BillingInvoice[]>(MOCK_BILLING_INVOICES);
   const [glAccounts, setGlAccounts] = useState<GeneralLedgerAccount[]>(MOCK_GL_ACCOUNTS);
@@ -273,6 +275,14 @@ export const FinanceRCMView: React.FC = () => {
     };
 
     setInvoices([inv, ...invoices]);
+    addBillingInvoice(inv);
+    addNotification({
+      title: 'Invoice Billing Baru Diterbitkan',
+      message: `${inv.invoiceNumber} untuk ${inv.patientName} (Rp ${inv.totalAmount.toLocaleString('id-ID')})`,
+      category: 'Billing',
+      type: 'normal'
+    });
+    addActivityLog(`Terbit Invoice ${inv.invoiceNumber} (${inv.patientName})`, 'Keuangan & Billing RCM');
     setShowNewInvoiceModal(false);
     showToast(`Invoice billing baru ${inv.invoiceNumber} berhasil diterbitkan.`);
   };
@@ -291,6 +301,13 @@ export const FinanceRCMView: React.FC = () => {
     };
 
     setGlAccounts([...glAccounts, newAcc]);
+    addNotification({
+      title: 'Akun Rekening COA Baru',
+      message: `${newAcc.accountCode} - ${newAcc.accountName} (${newAcc.category})`,
+      category: 'Finance',
+      type: 'normal'
+    });
+    addActivityLog(`Tambah Akun COA ${newAcc.accountCode}`, 'Keuangan & Billing RCM');
     setShowNewCoaModal(false);
     setNewAccountCode('');
     setNewAccountName('');

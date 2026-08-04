@@ -16,18 +16,47 @@ import {
   ArrowRightLeft,
   PackageCheck,
   ShieldAlert,
-  Brain
+  Brain,
+  X
 } from 'lucide-react';
 import { MOCK_DRUG_MASTER, MOCK_DRUG_BATCHES, MOCK_DRUG_DISPENSES } from '../data/mockData';
 import { DrugMaster, DrugBatch, DrugDispense } from '../types';
+import { useHospitalData } from '../context/HospitalDataContext';
 
 export const PharmacyView: React.FC = () => {
+  const { addPrescription, addActivityLog, addNotification } = useHospitalData();
   const [drugs, setDrugs] = useState<DrugMaster[]>(MOCK_DRUG_MASTER);
-  const [batches] = useState<DrugBatch[]>(MOCK_DRUG_BATCHES);
+  const [batches, setBatches] = useState<DrugBatch[]>(MOCK_DRUG_BATCHES);
   const [dispenses, setDispenses] = useState<DrugDispense[]>(MOCK_DRUG_DISPENSES);
   const [activeTab, setActiveTab] = useState<'master' | 'batches' | 'dispense' | 'compounding' | 'narcotics' | 'ai_insights'>('master');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+
+  // Input Data Modals state
+  const [showAddDrugModal, setShowAddDrugModal] = useState(false);
+  const [newDrugName, setNewDrugName] = useState('');
+  const [newDrugCategory, setNewDrugCategory] = useState('Antibiotik');
+  const [newDrugUnit, setNewDrugUnit] = useState('Tablet');
+  const [newDrugFormula, setNewDrugFormula] = useState('');
+  const [newDrugStock, setNewDrugStock] = useState(1000);
+  const [newDrugMinStock, setNewDrugMinStock] = useState(200);
+  const [newDrugUnitPrice, setNewDrugUnitPrice] = useState(1500);
+  const [newDrugSellingPrice, setNewDrugSellingPrice] = useState(2500);
+  const [newDrugSupplier, setNewDrugSupplier] = useState('PT Dexa Medica');
+
+  // Input Batch Modal State
+  const [showAddBatchModal, setShowAddBatchModal] = useState(false);
+  const [batchDrugName, setBatchDrugName] = useState('Paracetamol 500mg');
+  const [batchNumber, setBatchNumber] = useState(`B-2026-${Math.floor(1000 + Math.random() * 9000)}`);
+  const [batchExpDate, setBatchExpDate] = useState('2028-12-31');
+  const [batchQuantity, setBatchQuantity] = useState(500);
+
+  // Input Dispense / Prescriptions Modal State
+  const [showAddDispenseModal, setShowAddDispenseModal] = useState(false);
+  const [dispensePatientName, setDispensePatientName] = useState('Budi Santoso');
+  const [dispenseDoctorName, setDispenseDoctorName] = useState('dr. Hendra, Sp.PD');
+  const [dispenseDrugName, setDispenseDrugName] = useState('Amoxicillin 500mg');
+  const [dispenseDosage, setDispenseDosage] = useState('3x1 Tab (Sesudah Makan)');
 
   // Compounding / Racikan State
   const [racikanName, setRacikanName] = useState('Puyer Batuk Anak No. 1');
@@ -42,6 +71,84 @@ export const PharmacyView: React.FC = () => {
   const [simDrug1, setSimDrug1] = useState('Ceftriaxone Inj 1 Gram');
   const [simDrug2, setSimDrug2] = useState('Calcium IV Solution');
   const [interactionResult, setInteractionResult] = useState<string | null>(null);
+
+  const handleCreateDrug = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDrugName) return;
+    const newObj: DrugMaster = {
+      id: `drg-${Date.now()}`,
+      code: `OBT-${Math.floor(100 + Math.random() * 900)}`,
+      name: newDrugName,
+      category: newDrugCategory,
+      formula: newDrugFormula || `${newDrugName} Active Formula`,
+      unit: newDrugUnit,
+      minStock: Number(newDrugMinStock),
+      currentStock: Number(newDrugStock),
+      unitPrice: Number(newDrugUnitPrice),
+      sellingPrice: Number(newDrugSellingPrice),
+      fastMovingStatus: 'Fast Moving',
+      supplierName: newDrugSupplier,
+      barcode: `899${Math.floor(1000000 + Math.random() * 9000000)}`,
+      aiRestockForecastDays: 20,
+      drugInteractions: []
+    };
+    setDrugs([newObj, ...drugs]);
+    addNotification({
+      title: 'Master Obat Baru Ditambahkan',
+      message: `${newObj.name} (${newObj.code}) berhasil didaftarkan ke database Farmasi.`,
+      category: 'Farmasi',
+      type: 'normal'
+    });
+    addActivityLog(`Tambah Master Obat ${newObj.name}`, 'Farmasi & E-Prescribing');
+    setShowAddDrugModal(false);
+    setNewDrugName('');
+    setNewDrugFormula('');
+  };
+
+  const handleCreateBatch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newBatch: DrugBatch = {
+      id: `batch-${Date.now()}`,
+      drugMasterId: 'drg-01',
+      drugName: batchDrugName,
+      batchNumber: batchNumber,
+      expiryDate: batchExpDate,
+      quantityInStock: Number(batchQuantity),
+      manufactureDate: '2025-01-01',
+      supplier: 'PT Kalbe Farma',
+      storageLocation: 'Gudang Utama - Rak A3'
+    };
+    setBatches([newBatch, ...batches]);
+    addNotification({
+      title: 'Batch FEFO Obat Baru Masuk',
+      message: `Batch ${newBatch.batchNumber} (${newBatch.drugName}) exp: ${newBatch.expiryDate} telah ditambahkan.`,
+      category: 'Farmasi',
+      type: 'normal'
+    });
+    addActivityLog(`Tambah Batch FEFO ${newBatch.batchNumber}`, 'Farmasi & E-Prescribing');
+    setShowAddBatchModal(false);
+  };
+
+  const handleCreateDispense = (e: React.FormEvent) => {
+    e.preventDefault();
+    addPrescription({
+      patientName: dispensePatientName,
+      doctorName: dispenseDoctorName,
+      items: [{ drugName: dispenseDrugName, dosage: dispenseDosage, frequency: '3x1', durationDays: 5, route: 'Oral', instructions: 'Sesudah makan' }]
+    });
+    const newDispense: DrugDispense = {
+      id: `disp-${Date.now()}`,
+      prescriptionNumber: `RX-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+      patientName: dispensePatientName,
+      norm: `RM-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+      dispenseDate: new Date().toLocaleTimeString('id-ID'),
+      pharmacistName: 'Apt. Rina, S.Farm',
+      status: 'Dispensed',
+      items: [{ drugName: dispenseDrugName, quantity: 10, unitPrice: 2000, totalPrice: 20000 }]
+    };
+    setDispenses([newDispense, ...dispenses]);
+    setShowAddDispenseModal(false);
+  };
 
   const filteredDrugs = drugs.filter((d) => {
     const matchesSearch = d.name.toLowerCase().includes(searchTerm.toLowerCase()) || d.code.toLowerCase().includes(searchTerm.toLowerCase());
@@ -85,44 +192,27 @@ export const PharmacyView: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => {
-                alert('Membuka modul QR & Barcode Scanner Farmasi');
-              }}
-              className="flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-medium text-slate-200 border border-slate-700 hover:bg-slate-700 transition"
-            >
-              <Barcode className="h-4 w-4 text-cyan-400" />
-              Scan Barcode / QR
-            </button>
-            <button
-              onClick={() => {
-                const name = prompt('Nama Obat Baru:');
-                if (name) {
-                  const newObj: DrugMaster = {
-                    id: `drg-${Date.now()}`,
-                    code: `OBT-${Math.floor(100 + Math.random() * 900)}`,
-                    name,
-                    category: 'Antibiotik',
-                    formula: 'Active Compound 500mg',
-                    unit: 'Tablet',
-                    minStock: 500,
-                    currentStock: 1000,
-                    unitPrice: 1200,
-                    sellingPrice: 2000,
-                    fastMovingStatus: 'Fast Moving',
-                    supplierName: 'PT Dexa Medica',
-                    barcode: '8991209381',
-                    aiRestockForecastDays: 15,
-                    drugInteractions: []
-                  };
-                  setDrugs([newObj, ...drugs]);
-                }
-              }}
-              className="flex items-center gap-2 rounded-lg bg-teal-500 px-4 py-2.5 text-sm font-semibold text-slate-950 hover:bg-teal-400 shadow-lg transition"
+              onClick={() => setShowAddBatchModal(true)}
+              className="flex items-center gap-2 rounded-lg bg-slate-800 px-3.5 py-2 text-xs font-semibold text-teal-300 border border-teal-500/30 hover:bg-slate-700 transition"
             >
               <Plus className="h-4 w-4" />
-              Tambah Master Obat
+              + Input Batch FEFO
+            </button>
+            <button
+              onClick={() => setShowAddDispenseModal(true)}
+              className="flex items-center gap-2 rounded-lg bg-slate-800 px-3.5 py-2 text-xs font-semibold text-cyan-300 border border-cyan-500/30 hover:bg-slate-700 transition"
+            >
+              <Plus className="h-4 w-4" />
+              + Input Resep / Dispensing
+            </button>
+            <button
+              onClick={() => setShowAddDrugModal(true)}
+              className="flex items-center gap-2 rounded-lg bg-teal-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-teal-400 shadow-lg transition"
+            >
+              <Plus className="h-4 w-4" />
+              + Input Master Obat
             </button>
           </div>
         </div>
@@ -641,6 +731,316 @@ export const PharmacyView: React.FC = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 1: Input Master Obat Baru */}
+      {showAddDrugModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-lg rounded-2xl border border-teal-500/40 bg-slate-900 p-6 shadow-2xl text-slate-100">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Pill className="h-5 w-5 text-teal-400" />
+                <h3 className="text-lg font-bold text-white">Input Master Obat Baru</h3>
+              </div>
+              <button
+                onClick={() => setShowAddDrugModal(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateDrug} className="mt-4 space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">Nama Obat & Sediaan *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Contoh: Amoxicillin 500mg Cap"
+                  value={newDrugName}
+                  onChange={(e) => setNewDrugName(e.target.value)}
+                  className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-teal-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">Kategori Obat</label>
+                  <select
+                    value={newDrugCategory}
+                    onChange={(e) => setNewDrugCategory(e.target.value)}
+                    className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-teal-500"
+                  >
+                    <option value="Antibiotik">Antibiotik</option>
+                    <option value="Analgesik / Antiinflamasi">Analgesik / Antiinflamasi</option>
+                    <option value="Kardiovaskular">Kardiovaskular</option>
+                    <option value="Antidiabetes">Antidiabetes</option>
+                    <option value="Antihistamin">Antihistamin</option>
+                    <option value="Multivitamin">Multivitamin</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">Satuan Sediaan</label>
+                  <select
+                    value={newDrugUnit}
+                    onChange={(e) => setNewDrugUnit(e.target.value)}
+                    className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-teal-500"
+                  >
+                    <option value="Tablet">Tablet</option>
+                    <option value="Kapsul">Kapsul</option>
+                    <option value="Botol / Sirup">Botol / Sirup</option>
+                    <option value="Vial / Injeksi">Vial / Injeksi</option>
+                    <option value="Tube / Salep">Tube / Salep</option>
+                    <option value="Ampul">Ampul</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">Stok Awal</label>
+                  <input
+                    type="number"
+                    value={newDrugStock}
+                    onChange={(e) => setNewDrugStock(Number(e.target.value))}
+                    className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-teal-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">Batas Min Stok</label>
+                  <input
+                    type="number"
+                    value={newDrugMinStock}
+                    onChange={(e) => setNewDrugMinStock(Number(e.target.value))}
+                    className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-teal-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">Harga Beli (IDR)</label>
+                  <input
+                    type="number"
+                    value={newDrugUnitPrice}
+                    onChange={(e) => setNewDrugUnitPrice(Number(e.target.value))}
+                    className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-teal-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">Harga Jual (IDR)</label>
+                  <input
+                    type="number"
+                    value={newDrugSellingPrice}
+                    onChange={(e) => setNewDrugSellingPrice(Number(e.target.value))}
+                    className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-teal-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">Supplier / PBF</label>
+                <input
+                  type="text"
+                  value={newDrugSupplier}
+                  onChange={(e) => setNewDrugSupplier(e.target.value)}
+                  className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-teal-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowAddDrugModal(false)}
+                  className="rounded-lg bg-slate-800 px-4 py-2 text-slate-300 hover:bg-slate-700"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-teal-500 px-5 py-2 font-bold text-slate-950 hover:bg-teal-400 shadow-lg"
+                >
+                  Simpan Master Obat
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 2: Input Batch FEFO Obat Baru */}
+      {showAddBatchModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md rounded-2xl border border-teal-500/40 bg-slate-900 p-6 shadow-2xl text-slate-100">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Layers className="h-5 w-5 text-teal-400" />
+                <h3 className="text-lg font-bold text-white">Input Batch FEFO Obat</h3>
+              </div>
+              <button
+                onClick={() => setShowAddBatchModal(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateBatch} className="mt-4 space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">Nama Obat</label>
+                <select
+                  value={batchDrugName}
+                  onChange={(e) => setBatchDrugName(e.target.value)}
+                  className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-teal-500"
+                >
+                  {drugs.map((d) => (
+                    <option key={d.id} value={d.name}>
+                      {d.name} ({d.code})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">Nomor Batch (Lot Number)</label>
+                <input
+                  type="text"
+                  required
+                  value={batchNumber}
+                  onChange={(e) => setBatchNumber(e.target.value)}
+                  className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-teal-500 font-mono"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">Tanggal Expired (FEFO)</label>
+                  <input
+                    type="date"
+                    required
+                    value={batchExpDate}
+                    onChange={(e) => setBatchExpDate(e.target.value)}
+                    className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-teal-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 mb-1 font-medium">Jumlah Masuk (Stok Batch)</label>
+                  <input
+                    type="number"
+                    required
+                    value={batchQuantity}
+                    onChange={(e) => setBatchQuantity(Number(e.target.value))}
+                    className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-teal-500"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowAddBatchModal(false)}
+                  className="rounded-lg bg-slate-800 px-4 py-2 text-slate-300 hover:bg-slate-700"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-teal-500 px-5 py-2 font-bold text-slate-950 hover:bg-teal-400 shadow-lg"
+                >
+                  Simpan Batch FEFO
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 3: Input Resep / Dispensing Baru */}
+      {showAddDispenseModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md rounded-2xl border border-cyan-500/40 bg-slate-900 p-6 shadow-2xl text-slate-100">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div className="flex items-center gap-2">
+                <PackageCheck className="h-5 w-5 text-cyan-400" />
+                <h3 className="text-lg font-bold text-white">Input Resep / Dispensing Manual</h3>
+              </div>
+              <button
+                onClick={() => setShowAddDispenseModal(false)}
+                className="rounded-lg p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateDispense} className="mt-4 space-y-4 text-xs">
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">Nama Pasien</label>
+                <input
+                  type="text"
+                  required
+                  value={dispensePatientName}
+                  onChange={(e) => setDispensePatientName(e.target.value)}
+                  className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">Dokter Penulis Resep</label>
+                <input
+                  type="text"
+                  required
+                  value={dispenseDoctorName}
+                  onChange={(e) => setDispenseDoctorName(e.target.value)}
+                  className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">Nama Obat</label>
+                <select
+                  value={dispenseDrugName}
+                  onChange={(e) => setDispenseDrugName(e.target.value)}
+                  className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-cyan-500"
+                >
+                  {drugs.map((d) => (
+                    <option key={d.id} value={d.name}>
+                      {d.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-slate-400 mb-1 font-medium">Dosis & Aturan Pakai</label>
+                <input
+                  type="text"
+                  required
+                  value={dispenseDosage}
+                  onChange={(e) => setDispenseDosage(e.target.value)}
+                  className="w-full rounded-lg bg-slate-950 border border-slate-700 p-2.5 text-white focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setShowAddDispenseModal(false)}
+                  className="rounded-lg bg-slate-800 px-4 py-2 text-slate-300 hover:bg-slate-700"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-cyan-500 px-5 py-2 font-bold text-slate-950 hover:bg-cyan-400 shadow-lg"
+                >
+                  Simpan Dispensing Resep
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
