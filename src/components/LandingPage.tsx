@@ -32,10 +32,12 @@ import {
   LogIn,
   Sliders,
   HeartPulse,
-  Database
+  Database,
+  MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { UserRole } from '../types';
+import { OnlineAndWhatsappRegModal } from './OnlineAndWhatsappRegModal';
 
 interface LandingPageProps {
   onEnterApp: () => void;
@@ -44,6 +46,10 @@ interface LandingPageProps {
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp, onOpenLogin }) => {
   const { login } = useAuth();
+
+  // Registration Modal State
+  const [showRegModal, setShowRegModal] = useState(false);
+  const [regModalTab, setRegModalTab] = useState<'online' | 'whatsapp'>('online');
 
   // ROI Calculator State
   const [bedCount, setBedCount] = useState<number>(250);
@@ -139,23 +145,45 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp, onOpenLogi
             Sistem Informasi Manajemen Rumah Sakit (SIMRS) Enterprise Tercanggih Berbasis <strong className="text-cyan-300 font-semibold">Autonomous CDSS AI</strong>, <strong className="text-cyan-300 font-semibold">Voice EMR</strong>, <strong className="text-cyan-300 font-semibold">Smart ICU Real-Time</strong>, Interoperabilitas FHIR <strong className="text-cyan-300 font-semibold">SATUSEHAT Kemenkes RI</strong>, & Bridging V-Claim BPJS Health 2.0.
           </p>
 
-          {/* Dual CTAs */}
+          {/* Dual CTAs & Patient Self-Registration Options */}
           <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
             <button
               onClick={onEnterApp}
-              className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 px-8 py-4 text-sm font-extrabold text-white shadow-2xl shadow-cyan-500/30 hover:scale-105 transition group"
+              className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 px-7 py-3.5 text-sm font-extrabold text-white shadow-2xl shadow-cyan-500/30 hover:scale-105 transition group"
             >
               <Zap className="h-5 w-5 text-amber-300 group-hover:rotate-12 transition-transform" />
-              <span>Buka Demo Aplikasi SIMRS Sekarang</span>
+              <span>Buka Aplikasi SIMRS Utama</span>
               <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </button>
 
             <button
+              onClick={() => {
+                setRegModalTab('online');
+                setShowRegModal(true);
+              }}
+              className="flex items-center gap-2 rounded-2xl border border-cyan-500/50 bg-cyan-950/80 px-6 py-3.5 text-sm font-bold text-cyan-300 hover:bg-cyan-500 hover:text-slate-950 transition shadow-xl"
+            >
+              <Globe className="h-5 w-5" />
+              <span>🌐 Daftar Pasien Online</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setRegModalTab('whatsapp');
+                setShowRegModal(true);
+              }}
+              className="flex items-center gap-2 rounded-2xl border border-emerald-500/50 bg-emerald-950/80 px-6 py-3.5 text-sm font-bold text-emerald-300 hover:bg-emerald-500 hover:text-slate-950 transition shadow-xl"
+            >
+              <MessageSquare className="h-5 w-5" />
+              <span>💬 Daftar via WhatsApp</span>
+            </button>
+
+            <button
               onClick={onOpenLogin}
-              className="flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/90 px-7 py-4 text-sm font-bold text-slate-200 hover:border-cyan-400 hover:bg-slate-800 transition shadow-xl"
+              className="flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-900/90 px-6 py-3.5 text-sm font-bold text-slate-200 hover:border-cyan-400 hover:bg-slate-800 transition shadow-xl"
             >
               <KeyRound className="h-5 w-5 text-cyan-400" />
-              <span>Menu Login Multi-Role (SSO)</span>
+              <span>Login Multi-Role</span>
             </button>
           </div>
 
@@ -850,6 +878,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnterApp, onOpenLogi
           </div>
         </div>
       </footer>
+
+      {/* ONLINE & WHATSAPP REGISTRATION MODAL */}
+      <OnlineAndWhatsappRegModal
+        isOpen={showRegModal}
+        onClose={() => setShowRegModal(false)}
+        defaultTab={regModalTab}
+      />
     </div>
   );
 };

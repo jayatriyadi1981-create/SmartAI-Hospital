@@ -21,10 +21,13 @@ import {
   Clock,
   Check,
   Database,
-  ArrowRight
+  ArrowRight,
+  Globe,
+  MessageSquare
 } from 'lucide-react';
 import { Patient, PatientCategory } from '../types';
 import { MOCK_PATIENTS } from '../data/mockData';
+import { OnlineAndWhatsappRegModal } from './OnlineAndWhatsappRegModal';
 
 interface PatientRegistrationProps {
   onPatientRegistered?: (patient: Patient) => void;
@@ -38,6 +41,8 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
   const [activeCategory, setActiveCategory] = useState<PatientCategory>('Pasien BPJS');
   const [step, setStep] = useState<number>(1);
   const [isScanningOCR, setIsScanningOCR] = useState(false);
+  const [showOnlineWaModal, setShowOnlineWaModal] = useState(false);
+  const [modalDefaultTab, setModalDefaultTab] = useState<'online' | 'whatsapp'>('online');
   const [ocrSuccess, setOcrSuccess] = useState(false);
   const [isValidatingNik, setIsValidatingNik] = useState(false);
   const [nikValidationResult, setNikValidationResult] = useState<{
@@ -258,21 +263,41 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => {
+                setModalDefaultTab('online');
+                setShowOnlineWaModal(true);
+              }}
+              className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl shadow-lg transition-all text-xs"
+            >
+              <Globe className="w-4 h-4 text-slate-950" />
+              Pendaftaran Online Web
+            </button>
+            <button
+              onClick={() => {
+                setModalDefaultTab('whatsapp');
+                setShowOnlineWaModal(true);
+              }}
+              className="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-bold px-3.5 py-2 rounded-xl shadow-lg transition-all text-xs"
+            >
+              <MessageSquare className="w-4 h-4 text-slate-950" />
+              Pendaftaran WhatsApp
+            </button>
             <button
               onClick={handleSimulateOCR}
               disabled={isScanningOCR}
-              className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-bold px-4 py-2.5 rounded-xl shadow-lg transition-all text-xs disabled:opacity-50"
+              className="flex items-center gap-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-cyan-300 font-bold px-3.5 py-2 rounded-xl transition-all text-xs disabled:opacity-50"
             >
               {isScanningOCR ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
-                  Menganalisis Dokumen AI...
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Analyzing AI...
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-4 h-4 text-slate-950" />
-                  Auto Scan OCR (KTP / BPJS)
+                  <Sparkles className="w-4 h-4 text-cyan-400" />
+                  Auto Scan OCR
                 </>
               )}
             </button>
@@ -860,6 +885,13 @@ export const PatientRegistration: React.FC<PatientRegistrationProps> = ({
           </div>
         </div>
       )}
+
+      {/* ONLINE & WHATSAPP REGISTRATION MODAL */}
+      <OnlineAndWhatsappRegModal
+        isOpen={showOnlineWaModal}
+        onClose={() => setShowOnlineWaModal(false)}
+        defaultTab={modalDefaultTab}
+      />
     </div>
   );
 };
